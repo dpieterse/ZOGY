@@ -8,7 +8,6 @@
 #
 # Still to do:
 #
-# - add the calibration binary fits catalog used by zogy
 # - try to make apt-get install PSFEx (and SExtractor) with multi-threading
 #
 #
@@ -87,8 +86,12 @@ sudo ${packman} -y install astrometry.net
 # SExtractor (although it seems already installed automatically)
 sudo ${packman} -y install sextractor
 # the executable for this installation is 'sextractor' while ZOGY
-# expects 'sex'; make a symbolic link
+# versions starting from 0.9.2 expect 'source-extractor'; make a
+# symbolic link
+sudo ln -s /usr/bin/sextractor /usr/bin/source-extractor
+# the command 'sex' is used in ZOGY versions before 0.9.2
 sudo ln -s /usr/bin/sextractor /usr/bin/sex
+
 
 # SWarp
 sudo ${packman} -y install swarp
@@ -99,8 +102,8 @@ sudo ln -s /usr/bin/SWarp /usr/bin/swarp
 # PSFEx - this basic install does not allow multi-threading
 sudo ${packman} -y install psfex
 
-# ds9
-sudo ${packman} -y install saods9
+# ds9; add environment DEBIAN_FRONTEND to avoid interaction with TZONE
+#DEBIAN_FRONTEND=noninteractive sudo ${packman} -y install saods9
 
 
 # download calibration catalog
@@ -111,7 +114,8 @@ url="https://storage.googleapis.com/blackbox-auxdata"
 # with Kurucz templates
 sudo wget -nc $url/photometry/ML_calcat_kur_allsky_ext1deg_20181115.fits.gz -P ${ZOGYHOME}/CalFiles/
 # with Pickles templates
-sudo wget -nc $url/photometry/ML_calcat_pick_allsky_ext1deg_20181201.fits.gz -P ${ZOGYHOME}/CalFiles/
+#sudo wget -nc $url/photometry/ML_calcat_pick_allsky_ext1deg_20181201.fits.gz -P ${ZOGYHOME}/CalFiles/
+echo "gunzipping calibration catalog(s) ..."
 sudo gunzip ${ZOGYHOME}/CalFiles/ML_calcat*.gz
 
 
@@ -145,6 +149,9 @@ sudo wget -nc $url/astrometry/index-500{4..6}-1{0..1}.fits -P ${dir_save}
 # set environent variables:
 # ================================================================================
 
+# let /usr/bin/python refer to version installed above
+sudo ln -sf /usr/bin/python${v_python} /usr/bin/python
+
 echo
 echo "======================================================================"
 echo
@@ -163,9 +170,6 @@ then
     echo "else"
     echo "    export PYTHONPATH=\${PYTHONPATH}:${zogyhome}:${zogyhome}/Settings"
     echo "fi"
-    echo
-    echo "# python alias"
-    echo "alias python=python${v_python}"
 fi
 
 if [[ ${SHELL} == *"csh"* ]]
@@ -176,9 +180,6 @@ then
     echo "else"
     echo "    setenv PYTHONPATH ${zogyhome}:${zogyhome}/Settings"
     echo "endif"
-    echo 
-    echo "# python alias"
-    echo "alias python python${v_python}"
 fi
 
 echo
