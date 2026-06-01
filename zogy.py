@@ -8705,7 +8705,9 @@ def flux_optimal_iter (P, D, bkg_var, mask_use, nsigma_inn, nsigma_out,
                     idx_limfrac = idx_sort[mask_use_inn][:npix_limfrac]
 
                     # update inner mask_rej
-                    mask_rej[mask_inn][idx_limfrac] = True
+                    inner_indices = np.where(mask_inn)[0]
+                    mask_rej[mask_inn] = False # reset mask
+                    mask_rej[inner_indices[idx_limfrac]] = True
 
                     if False:
                         log.warning (
